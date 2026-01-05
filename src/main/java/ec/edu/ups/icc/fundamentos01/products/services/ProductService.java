@@ -13,6 +13,8 @@ public interface ProductService {
 
     List<ProductResponseDto> findAll();
 
+    ProductResponseDto findOne(int id);   // ← ESTE FALTABA
+
     ProductResponseDto update(int id, UpdateProductDto dto);
 
     ProductResponseDto partialUpdate(int id, PartialUpdateProductDto dto);
