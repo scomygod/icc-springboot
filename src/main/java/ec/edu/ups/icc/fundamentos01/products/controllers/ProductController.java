@@ -1,14 +1,20 @@
 package ec.edu.ups.icc.fundamentos01.products.controllers;
 
+import ec.edu.ups.icc.fundamentos01.products.dtos.CreateProductDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.PartialUpdateProductDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
+import ec.edu.ups.icc.fundamentos01.products.services.ProductService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import ec.edu.ups.icc.fundamentos01.products.dtos.CreateProductDto;
-import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
-import ec.edu.ups.icc.fundamentos01.products.dtos.PartialUpdateProductDto;
-import ec.edu.ups.icc.fundamentos01.products.services.ProductService;
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/products")
+@Validated
 public class ProductController {
 
     private final ProductService service;
@@ -17,43 +23,24 @@ public class ProductController {
         this.service = service;
     }
 
-    // GET ALL
-    @GetMapping
-    public Object findAll() {
-        return service.findAll();
-    }
-
-    // GET BY ID
-    @GetMapping("/{id}")
-    public Object findOne(@PathVariable int id) {
-        return service.findOne(id);
-    }
-
-    // CREATE
     @PostMapping
-    public Object create(@RequestBody CreateProductDto dto) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProductResponseDto create(@Valid @RequestBody CreateProductDto dto) {
         return service.create(dto);
     }
 
-    // PUT (UPDATE COMPLETE)
+    @GetMapping
+    public List<ProductResponseDto> findAll() {
+        return service.findAll();
+    }
+
     @PutMapping("/{id}")
-    public Object update(
-            @PathVariable int id,
-            @RequestBody UpdateProductDto dto) {
+    public ProductResponseDto update(@PathVariable int id, @Valid @RequestBody UpdateProductDto dto) {
         return service.update(id, dto);
     }
 
-    // PATCH (UPDATE PARTIAL)
     @PatchMapping("/{id}")
-    public Object partialUpdate(
-            @PathVariable int id,
-            @RequestBody PartialUpdateProductDto dto) {
+    public ProductResponseDto partialUpdate(@PathVariable int id, @Valid @RequestBody PartialUpdateProductDto dto) {
         return service.partialUpdate(id, dto);
-    }
-
-    // DELETE
-    @DeleteMapping("/{id}")
-    public Object delete(@PathVariable int id) {
-        return service.delete(id);
     }
 }

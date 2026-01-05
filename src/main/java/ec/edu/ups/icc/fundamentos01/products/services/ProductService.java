@@ -1,19 +1,19 @@
 package ec.edu.ups.icc.fundamentos01.products.services;
 
+import ec.edu.ups.icc.fundamentos01.products.dtos.CreateProductDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.PartialUpdateProductDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
+
 import java.util.List;
-import ec.edu.ups.icc.fundamentos01.products.dtos.*;
 
 public interface ProductService {
 
-    List<ProductResponseDto> findAll();
-
-    Object findOne(int id);
-
     ProductResponseDto create(CreateProductDto dto);
 
-    Object update(int id, UpdateProductDto dto);
+    List<ProductResponseDto> findAll();
 
-    Object partialUpdate(int id, PartialUpdateProductDto dto);
+    ProductResponseDto update(int id, UpdateProductDto dto);
 
-    Object delete(int id);
+    ProductResponseDto partialUpdate(int id, PartialUpdateProductDto dto);
 }

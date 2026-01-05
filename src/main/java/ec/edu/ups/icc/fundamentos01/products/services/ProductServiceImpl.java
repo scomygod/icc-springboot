@@ -1,87 +1,70 @@
 package ec.edu.ups.icc.fundamentos01.products.services;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import ec.edu.ups.icc.fundamentos01.products.dtos.CreateProductDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.PartialUpdateProductDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
+import ec.edu.ups.icc.fundamentos01.products.entities.Product;
+import ec.edu.ups.icc.fundamentos01.products.entities.ProductEntity;
+import ec.edu.ups.icc.fundamentos01.products.mappers.ProductMapper;
+import ec.edu.ups.icc.fundamentos01.products.repositories.ProductRepository;
 import org.springframework.stereotype.Service;
 
-import ec.edu.ups.icc.fundamentos01.products.dtos.*;
-import ec.edu.ups.icc.fundamentos01.products.entities.ProductEntitie;
-import ec.edu.ups.icc.fundamentos01.products.mappers.ProductMapper;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    private List<ProductEntitie> products = new ArrayList<>();
-    private int currentId = 1;
+    private final ProductRepository repo;
 
-    @Override
-    public List<ProductResponseDto> findAll() {
-        return products.stream()
-                .map(ProductMapper::toResponse)
-                .toList();
-    }
-
-    @Override
-    public Object findOne(int id) {
-        ProductResponseDto product = products.stream()
-                .filter(p -> p.getId() == id)
-                .map(ProductMapper::toResponse)
-                .findFirst()
-                .orElse(null);
-
-        if (product == null) {
-            return new Object() { public String error = "Product not found"; };
-        }
-
-        return product;
+    public ProductServiceImpl(ProductRepository repo) {
+        this.repo = repo;
     }
 
     @Override
     public ProductResponseDto create(CreateProductDto dto) {
-        ProductEntitie product =
-                ProductMapper.toEntity(currentId++, dto.name, dto.cant);
-        products.add(product);
-        return ProductMapper.toResponse(product);
+        if (dto.name == null || dto.name.isBlank() || dto.name.length() < 3)
+            throw new IllegalArgumentException("Nombre inválido");
+
+        if (repo.findByName(dto.name).isPresent())
+            throw new IllegalStateException("El producto ya existe");
+
+        Product product = ProductMapper.fromCreateDto(dto);
+        ProductEntity saved = repo.save(ProductMapper.toEntity(product));
+        return ProductMapper.toResponse(ProductMapper.fromEntity(saved));
     }
 
     @Override
-    public Object update(int id, UpdateProductDto dto) {
-        ProductEntitie product =
-                products.stream().filter(p -> p.getId() == id).findFirst().orElse(null);
-
-        if (product == null)
-            return new Object() { public String error = "Product not found"; };
-
-        product.setName(dto.name);
-        product.setCant(dto.cant);
-
-        return ProductMapper.toResponse(product);
+    public List<ProductResponseDto> findAll() {
+        // Evita lanzar excepción aunque la DB tenga nombres nulos o productos vacíos
+        return repo.findAll().stream()
+                .map(ProductMapper::fromEntity)
+                .map(ProductMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Object partialUpdate(int id, PartialUpdateProductDto dto) {
-        ProductEntitie product =
-                products.stream().filter(p -> p.getId() == id).findFirst().orElse(null);
+    public ProductResponseDto update(int id, UpdateProductDto dto) {
+        ProductEntity entity = repo.findById((long) id)
+                .orElseThrow(() -> new IllegalStateException("Producto no encontrado"));
 
-        if (product == null)
-            return new Object() { public String error = "Product not found"; };
+        Product product = ProductMapper.fromEntity(entity);
+        product = ProductMapper.fromUpdateDto(dto, product);
 
-        if (dto.name != null)
-            product.setName(dto.name);
-        if (dto.cant != null)
-            product.setCant(dto.cant);
-
-        return ProductMapper.toResponse(product);
+        ProductEntity updated = repo.save(ProductMapper.toEntity(product));
+        return ProductMapper.toResponse(ProductMapper.fromEntity(updated));
     }
 
     @Override
-    public Object delete(int id) {
-        boolean removed = products.removeIf(p -> p.getId() == id);
+    public ProductResponseDto partialUpdate(int id, PartialUpdateProductDto dto) {
+        ProductEntity entity = repo.findById((long) id)
+                .orElseThrow(() -> new IllegalStateException("Producto no encontrado"));
 
-        if (!removed)
-            return new Object() { public String error = "Product not found"; };
+        Product product = ProductMapper.fromEntity(entity);
+        product = ProductMapper.fromPartialDto(dto, product);
 
-        return new Object() { public String message = "Deleted successfully"; };
+        ProductEntity updated = repo.save(ProductMapper.toEntity(product));
+        return ProductMapper.toResponse(ProductMapper.fromEntity(updated));
     }
 }

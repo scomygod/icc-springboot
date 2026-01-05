@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class StatusController {
-  @GetMapping("/api/status")
+  @GetMapping("/status")
     public Map<String, Object> status() {
         return Map.of(
                 "service", "Spring Boot API",

@@ -3,5 +3,7 @@ package ec.edu.ups.icc.fundamentos01.products.dtos;
 public class ProductResponseDto {
     public int id;
     public String name;
-    public int cant;
+    public Double price;
+    public Integer stock;
+    public String createdAt;
 }

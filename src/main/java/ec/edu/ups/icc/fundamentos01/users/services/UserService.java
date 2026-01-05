@@ -15,5 +15,6 @@ public interface UserService {
 
     Object partialUpdate(int id, PartialUpdateUserDto dto);
 
-    Object delete(int id);
+    void delete(int id);
+
 }
