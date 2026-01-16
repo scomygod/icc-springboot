@@ -25,7 +25,7 @@ public class ProductMapper {
         Double price = dto.price; 
         Integer stock = dto.stock; 
 
-        return new Product(0, name, price, stock, null);
+        return new Product(null, name, price, stock, null);  // ⭐ null (Long) en vez de 0 (int)
     }
 
     public static Product fromUpdateDto(UpdateProductDto dto, Product existing) {
@@ -58,7 +58,7 @@ public class ProductMapper {
                 : 0;
 
         return new Product(
-                entity.getId() != null ? entity.getId().intValue() : 0,
+                entity.getId(),  
                 name,
                 price,
                 stock,

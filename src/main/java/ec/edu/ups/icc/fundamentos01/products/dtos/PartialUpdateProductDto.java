@@ -1,15 +1,20 @@
+// src/main/java/ec/edu/ups/icc/fundamentos01/products/dtos/PartialUpdateProductDto.java
 package ec.edu.ups.icc.fundamentos01.products.dtos;
 
 import jakarta.validation.constraints.*;
 
 public class PartialUpdateProductDto {
 
-    @Size(min = 3, max = 150)
+    @Size(min = 3, max = 150, message = "El nombre debe tener entre 3 y 150 caracteres")
     public String name;
 
-    @DecimalMin(value = "0.0", inclusive = true)
+    @DecimalMin(value = "0.0", inclusive = true, message = "El precio no puede ser negativo")
     public Double price;
 
-    @Min(0)
+    @Min(value = 0, message = "El stock no puede ser negativo")
     public Integer stock;
+
+    public Long categoryId;
+
+    public Long ownerId;
 }

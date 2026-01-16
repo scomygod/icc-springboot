@@ -1,13 +1,11 @@
+// src/main/java/ec/edu/ups/icc/fundamentos01/users/entities/UserEntity.java
 package ec.edu.ups.icc.fundamentos01.users.entities;
 
 import ec.edu.ups.icc.fundamentos01.core.entities.BaseModel;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
-
 public class UserEntity extends BaseModel {
 
     @Column(nullable = false, length = 150)
@@ -19,6 +17,9 @@ public class UserEntity extends BaseModel {
     @Column(nullable = false)
     private String password;
 
+    // ⭐ ELIMINAR la relación @OneToMany con products
+    // Según la guía, User NO conoce directamente sus productos
+
     // Getters y Setters
     public String getName() {
         return name;
@@ -27,6 +28,7 @@ public class UserEntity extends BaseModel {
     public void setName(String name) {
         this.name = name;
     }
+
     public String getEmail() {
         return email;
     }
@@ -42,5 +44,4 @@ public class UserEntity extends BaseModel {
     public void setPassword(String password) {
         this.password = password;
     }
-
 }

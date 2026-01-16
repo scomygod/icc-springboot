@@ -1,3 +1,4 @@
+// src/main/java/ec/edu/ups/icc/fundamentos01/products/entities/Product.java
 package ec.edu.ups.icc.fundamentos01.products.entities;
 
 import java.time.LocalDateTime;
@@ -9,14 +10,14 @@ import ec.edu.ups.icc.fundamentos01.products.dtos.UpdateProductDto;
 
 public class Product {
 
-    private int id;
+    private Long id; // ⭐ Cambiar de int a Long
     private String name;
     private Double price;
     private Integer stock;
     private LocalDateTime createdAt;
 
     // Constructor público para permitir instanciación desde mappers
-    public Product(int id, String name, Double price, Integer stock, LocalDateTime createdAt) {
+    public Product(Long id, String name, Double price, Integer stock, LocalDateTime createdAt) {
         if (name == null || name.isBlank() || name.length() < 3)
             throw new IllegalArgumentException("Nombre inválido");
         if (price == null || price < 0)
@@ -33,24 +34,24 @@ public class Product {
 
     // Factory desde DTO de creación
     public static Product fromDto(CreateProductDto dto) {
-        return new Product(0, dto.name, dto.price, dto.stock, null);
+        return new Product(null, dto.name, dto.price, dto.stock, null); // ⭐ null en vez de 0
     }
 
     // Factory desde entidad
     public static Product fromEntity(ProductEntity entity) {
         return new Product(
-            entity.getId() != null ? entity.getId().intValue() : 0,
-            entity.getName() != null ? entity.getName() : "Producto sin nombre",
-            entity.getPrice() != null ? entity.getPrice() : 0.0,
-            entity.getStock() != null ? entity.getStock() : 0,
-            entity.getCreatedAt()
-        );
+                entity.getId(), // ⭐ Ya es Long, no necesita conversión
+                entity.getName() != null ? entity.getName() : "Producto sin nombre",
+                entity.getPrice() != null ? entity.getPrice() : 0.0,
+                entity.getStock() != null ? entity.getStock() : 0,
+                entity.getCreatedAt());
     }
 
     // Convertir a entidad
     public ProductEntity toEntity() {
         ProductEntity entity = new ProductEntity();
-        if (id > 0) entity.setId((long) id);
+        if (id != null && id > 0)
+            entity.setId(id); // ⭐ Ya es Long
         entity.setName(name);
         entity.setPrice(price);
         entity.setStock(stock);
@@ -65,28 +66,48 @@ public class Product {
         dto.name = name;
         dto.price = price;
         dto.stock = stock;
-        dto.createdAt = createdAt.toString();
+        dto.createdAt = createdAt; 
         return dto;
     }
 
     // Actualización completa
     public void update(UpdateProductDto dto) {
-        if (dto.name != null) this.name = dto.name;
-        if (dto.price != null) this.price = dto.price;
-        if (dto.stock != null) this.stock = dto.stock;
+        if (dto.name != null)
+            this.name = dto.name;
+        if (dto.price != null)
+            this.price = dto.price;
+        if (dto.stock != null)
+            this.stock = dto.stock;
     }
 
     // Actualización parcial
     public void partialUpdate(PartialUpdateProductDto dto) {
-        if (dto.name != null) this.name = dto.name;
-        if (dto.price != null) this.price = dto.price;
-        if (dto.stock != null) this.stock = dto.stock;
+        if (dto.name != null && !dto.name.isBlank())
+            this.name = dto.name;
+        if (dto.price != null)
+            this.price = dto.price;
+        if (dto.stock != null)
+            this.stock = dto.stock;
     }
 
     // Getters
-    public int getId() { return id; }
-    public String getName() { return name; }
-    public Double getPrice() { return price; }
-    public Integer getStock() { return stock; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public Long getId() { // ⭐ Cambiar retorno a Long
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public Integer getStock() {
+        return stock;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 }
