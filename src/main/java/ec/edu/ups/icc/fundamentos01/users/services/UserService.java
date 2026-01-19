@@ -1,20 +1,26 @@
 package ec.edu.ups.icc.fundamentos01.users.services;
 
+import ec.edu.ups.icc.fundamentos01.users.dtos.CreateUserDto;
+import ec.edu.ups.icc.fundamentos01.users.dtos.PartialUpdateUserDto;
+import ec.edu.ups.icc.fundamentos01.users.dtos.UpdateUserDto;
+import ec.edu.ups.icc.fundamentos01.users.dtos.UserResponseDto;
+import ec.edu.ups.icc.fundamentos01.products.dtos.ProductResponseDto;
+
 import java.util.List;
-import ec.edu.ups.icc.fundamentos01.users.dtos.*;
 
 public interface UserService {
 
     List<UserResponseDto> findAll();
 
-    Object findOne(int id);
+    UserResponseDto findOne(int id);
 
     UserResponseDto create(CreateUserDto dto);
 
-    Object update(int id, UpdateUserDto dto);
+    UserResponseDto update(int id, UpdateUserDto dto);
 
-    Object partialUpdate(int id, PartialUpdateUserDto dto);
+    UserResponseDto partialUpdate(int id, PartialUpdateUserDto dto);
 
     void delete(int id);
 
+    List<ProductResponseDto> getProductsByUserId(Long userId);
 }

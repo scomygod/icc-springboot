@@ -1,7 +1,10 @@
-// src/main/java/ec/edu/ups/icc/fundamentos01/products/dtos/PartialUpdateProductDto.java
 package ec.edu.ups.icc.fundamentos01.products.dtos;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
+
+import java.util.Set;
 
 public class PartialUpdateProductDto {
 
@@ -14,7 +17,10 @@ public class PartialUpdateProductDto {
     @Min(value = 0, message = "El stock no puede ser negativo")
     public Integer stock;
 
-    public Long categoryId;
+    /**
+     * Opcional: si viene, se reemplaza el set completo de categorías
+     */
+    public Set<Long> categoryIds;
 
     public Long ownerId;
 }

@@ -4,8 +4,8 @@ package ec.edu.ups.icc.fundamentos01.categories.entities;
 import ec.edu.ups.icc.fundamentos01.core.entities.BaseModel;
 import ec.edu.ups.icc.fundamentos01.products.entities.ProductEntity;
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "categories")
@@ -17,9 +17,9 @@ public class CategoryEntity extends BaseModel {
     @Column(length = 255)
     private String description;
 
-    // Relación 1:N - Una categoría tiene muchos productos
-    @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
-    private List<ProductEntity> products = new ArrayList<>();
+    // Relación N:N - Una categoría tiene muchos productos, un producto tiene muchas categorías
+    @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
+    private Set<ProductEntity> products = new HashSet<>();
 
     // Constructores
     public CategoryEntity() {
@@ -49,22 +49,22 @@ public class CategoryEntity extends BaseModel {
         this.description = description;
     }
 
-    public List<ProductEntity> getProducts() {
+    public Set<ProductEntity> getProducts() {
         return products;
     }
 
-    public void setProducts(List<ProductEntity> products) {
-        this.products = products;
+    public void setProducts(Set<ProductEntity> products) {
+        this.products = products != null ? products : new HashSet<>();
     }
 
     // Métodos helper para mantener sincronización bidireccional
     public void addProduct(ProductEntity product) {
-        products.add(product);
-        product.setCategory(this);
+        this.products.add(product);
+        product.getCategories().add(this);
     }
 
     public void removeProduct(ProductEntity product) {
-        products.remove(product);
-        product.setCategory(null);
+        this.products.remove(product);
+        product.getCategories().remove(this);
     }
 }

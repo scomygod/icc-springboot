@@ -2,26 +2,30 @@
 package ec.edu.ups.icc.fundamentos01.products.dtos;
 
 import jakarta.validation.constraints.*;
+import java.util.Set;
 
 public class CreateProductDto {
 
     @NotBlank(message = "El nombre es obligatorio")
-    @Size(min = 3, max = 150, message = "El nombre debe tener entre 3 y 150 caracteres")
+    @Size(min = 3, max = 150)
     public String name;
 
     @NotNull(message = "El precio es obligatorio")
-    @DecimalMin(value = "0.0", inclusive = false, message = "El precio debe ser mayor a 0")
+    @DecimalMin(value = "0.0", inclusive = false)
     public Double price;
 
-    @Size(max = 500, message = "La descripción no puede superar 500 caracteres")
-    public String description;  
+    @Size(max = 500)
+    public String description;
 
-    @Min(value = 0, message = "El stock no puede ser negativo")  // ⭐ Quité @NotNull
-    public Integer stock;
+    @Min(value = 0, message = "El stock no puede ser negativo")
+    public Integer stock;  // ⭐ Agregué esto
+
+    // ============== RELACIONES ==============
 
     @NotNull(message = "El ID del usuario es obligatorio")
-    public Long userId;  
+    public Long userId;
 
-    @NotNull(message = "El ID de la categoría es obligatorio")
-    public Long categoryId;
+    @NotNull(message = "Debe especificar al menos una categoría")
+    @Size(min = 1, message = "El producto debe tener al menos una categoría")
+    public Set<Long> categoryIds;  // ⭐ Cambió de Long a Set<Long>
 }

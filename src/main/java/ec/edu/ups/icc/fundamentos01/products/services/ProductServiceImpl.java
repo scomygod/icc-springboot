@@ -1,4 +1,3 @@
-// src/main/java/ec/edu/ups/icc/fundamentos01/products/services/ProductServiceImpl.java
 package ec.edu.ups.icc.fundamentos01.products.services;
 
 import ec.edu.ups.icc.fundamentos01.categories.entities.CategoryEntity;
@@ -14,7 +13,9 @@ import ec.edu.ups.icc.fundamentos01.users.entities.UserEntity;
 import ec.edu.ups.icc.fundamentos01.users.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -37,19 +38,18 @@ public class ProductServiceImpl implements ProductService {
         UserEntity owner = userRepository.findById(dto.userId)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + dto.userId));
 
-        CategoryEntity category = categoryRepository.findById(dto.categoryId)
-                .orElseThrow(() -> new NotFoundException("Categoría no encontrada con ID: " + dto.categoryId));
+        Set<CategoryEntity> categories = validateAndGetCategories(dto.categoryIds);
 
         ProductEntity product = new ProductEntity();
         product.setName(dto.name);
         product.setPrice(dto.price);
         product.setDescription(dto.description);
-        product.setStock(dto.stock != null ? dto.stock : 0); // ⭐ Esta es la línea correcta
-        product.setCategory(category);
+        product.setStock(dto.stock != null ? dto.stock : 0);
         product.setOwner(owner);
+        product.setCategories(categories);
 
-        ProductEntity saved = productRepository.save(product); // ⭐ Guarda primero
-        return toResponseDto(saved); // ⭐ Luego retorna
+        ProductEntity saved = productRepository.save(product);
+        return toResponseDto(saved);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class ProductServiceImpl implements ProductService {
         if (!categoryRepository.existsById(categoryId)) {
             throw new NotFoundException("Categoría no encontrada con ID: " + categoryId);
         }
-        return productRepository.findByCategoryId(categoryId).stream()
+        return productRepository.findByCategoriesId(categoryId).stream()
                 .map(this::toResponseDto)
                 .toList();
     }
@@ -91,17 +91,26 @@ public class ProductServiceImpl implements ProductService {
         ProductEntity product = productRepository.findById((long) id)
                 .orElseThrow(() -> new NotFoundException("Producto no encontrado con ID: " + id));
 
-        CategoryEntity category = categoryRepository.findById(dto.categoryId)
-                .orElseThrow(() -> new NotFoundException("Categoría no encontrada con ID: " + dto.categoryId));
+        Set<CategoryEntity> newCategories = validateAndGetCategories(dto.categoryIds);
 
-        product.setName(dto.name);
-        product.setPrice(dto.price);
-        product.setDescription(dto.description);
-        product.setStock(dto.stock);
-        product.setCategory(category);
+        if (dto.name != null) {
+            product.setName(dto.name);
+        }
+        if (dto.price != null) {
+            product.setPrice(dto.price);
+        }
+        if (dto.description != null) {
+            product.setDescription(dto.description);
+        }
+        if (dto.stock != null) {
+            product.setStock(dto.stock);
+        }
 
-        ProductEntity updated = productRepository.save(product);
-        return toResponseDto(updated);
+        product.clearCategories();
+        product.setCategories(newCategories);
+
+        ProductEntity saved = productRepository.save(product);
+        return toResponseDto(saved);
     }
 
     @Override
@@ -118,10 +127,10 @@ public class ProductServiceImpl implements ProductService {
         if (dto.stock != null) {
             product.setStock(dto.stock);
         }
-        if (dto.categoryId != null) {
-            CategoryEntity category = categoryRepository.findById(dto.categoryId)
-                    .orElseThrow(() -> new NotFoundException("Categoría no encontrada"));
-            product.setCategory(category);
+        if (dto.categoryIds != null && !dto.categoryIds.isEmpty()) {
+            Set<CategoryEntity> categories = validateAndGetCategories(dto.categoryIds);
+            product.clearCategories();
+            product.setCategories(categories);
         }
 
         ProductEntity updated = productRepository.save(product);
@@ -135,8 +144,23 @@ public class ProductServiceImpl implements ProductService {
         productRepository.delete(product);
     }
 
+    private Set<CategoryEntity> validateAndGetCategories(Set<Long> categoryIds) {
+        if (categoryIds == null || categoryIds.isEmpty()) {
+            throw new IllegalArgumentException("Debe proporcionar al menos una categoría");
+        }
+
+        Set<CategoryEntity> categories = new HashSet<>();
+        for (Long categoryId : categoryIds) {
+            CategoryEntity category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new NotFoundException("Categoría no encontrada con ID: " + categoryId));
+            categories.add(category);
+        }
+        return categories;
+    }
+
     private ProductResponseDto toResponseDto(ProductEntity entity) {
         ProductResponseDto dto = new ProductResponseDto();
+
         dto.id = entity.getId();
         dto.name = entity.getName();
         dto.price = entity.getPrice();
@@ -149,15 +173,22 @@ public class ProductServiceImpl implements ProductService {
         userDto.email = entity.getOwner().getEmail();
         dto.user = userDto;
 
-        ProductResponseDto.CategoryResponseDto categoryDto = new ProductResponseDto.CategoryResponseDto();
-        categoryDto.id = entity.getCategory().getId();
-        categoryDto.name = entity.getCategory().getName();
-        categoryDto.description = entity.getCategory().getDescription();
-        dto.category = categoryDto;
+        dto.categories = entity.getCategories().stream()
+                .map(this::toCategorySummary)
+                .sorted((c1, c2) -> c1.name.compareTo(c2.name))
+                .toList();
 
         dto.createdAt = entity.getCreatedAt();
         dto.updatedAt = entity.getUpdatedAt();
 
         return dto;
+    }
+
+    private ProductResponseDto.CategorySummaryDto toCategorySummary(CategoryEntity category) {
+        ProductResponseDto.CategorySummaryDto summary = new ProductResponseDto.CategorySummaryDto();
+        summary.id = category.getId();
+        summary.name = category.getName();
+        summary.description = category.getDescription();
+        return summary;
     }
 }
