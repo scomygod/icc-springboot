@@ -25,7 +25,6 @@ public class CreateProductDto {
     @NotNull(message = "El ID del usuario es obligatorio")
     public Long userId;
 
-    @NotNull(message = "Debe especificar al menos una categoría")
-    @Size(min = 1, message = "El producto debe tener al menos una categoría")
-    public Set<Long> categoryIds;  // ⭐ Cambió de Long a Set<Long>
+    // ⭐ Las categorías ahora son opcionales
+    public Set<Long> categoryIds;
 }
